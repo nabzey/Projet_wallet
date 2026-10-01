@@ -1,0 +1,40 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: wallet-service
+  datasource:
+    url: jdbc:postgresql://localhost:5440/wallet_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:changez-cette-cle-secrete-en-production-min-256-bits}
+    expiration-minutes: 60
+  otp:
+    expiration-minutes: 5
+    max-tentatives: 3
+  outbox:
+    fixed-delay-ms: 5000
+
+kafka-topics:
+  paiement-effectue: paiement-effectue
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

@@ -1,0 +1,38 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: service-app
+  datasource:
+    url: jdbc:postgresql://localhost:5441/service_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: service-app
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:changez-cette-cle-secrete-en-production-min-256-bits}
+  wallet:
+    base-url: ${APP_WALLET_BASE_URL:http://localhost:8081}
+
+kafka-topics:
+  paiement-effectue: paiement-effectue
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
