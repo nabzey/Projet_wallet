@@ -43,6 +43,7 @@ public class OtpService {
         System.out.println("[OTP simulé] Code envoyé à " + telephone + " : " + code);
     }
 
+    @org.springframework.transaction.annotation.Transactional(noRollbackFor = sn.l3gl.wallet.exception.BusinessException.class)
     public void verifier(String telephone, String codeSaisi) {
         Otp otp = otpRepository.findFirstByTelephoneAndUtiliseFalseOrderByIdDesc(telephone)
                 .orElseThrow(OtpInvalideException::new);

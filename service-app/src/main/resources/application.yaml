@@ -25,10 +25,12 @@ spring:
       enable-auto-commit: false
 
 app:
+  kafka:
+    enabled: ${APP_KAFKA_ENABLED:true}
   jwt:
     secret: ${APP_JWT_SECRET:changez-cette-cle-secrete-en-production-min-256-bits}
   wallet:
-    base-url: ${APP_WALLET_BASE_URL:http://localhost:8081}
+    base-url: ${APP_WALLET_BASE_URL:http://localhost:8091}
 
 kafka-topics:
   paiement-effectue: paiement-effectue

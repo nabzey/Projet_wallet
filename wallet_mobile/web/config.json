@@ -1,0 +1,4 @@
+{
+  "walletUrl": "http://localhost:8091",
+  "serviceUrl": "http://localhost:8092"
+}

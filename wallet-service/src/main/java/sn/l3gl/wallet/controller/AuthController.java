@@ -35,8 +35,13 @@ public class AuthController {
     @Operation(summary = "2. Vérifier le code OTP", description = "Crée le compte utilisateur si le numéro est nouveau. Utiliser le code affiché dans les logs.")
     @PostMapping("/verify-otp")
     public ResponseEntity<Map<String, String>> verifierOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        authWrapper.verifierOtp(request);
-        return ResponseEntity.ok(Map.of("message", "OTP vérifié, veuillez définir votre PIN."));
+        String verificationToken = authWrapper.verifierOtp(request);
+        return ResponseEntity.ok(Map.of("message", "OTP vérifié, veuillez définir votre PIN.", "verificationToken", verificationToken));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> connecter(@Valid @RequestBody CreatePinRequest request) {
+        return ResponseEntity.ok(authWrapper.connecter(request));
     }
 
     @Operation(summary = "3. Créer le PIN", description = "Définit le PIN (4 chiffres), crée le compte wallet et retourne le JWT à utiliser via le bouton Authorize.")

@@ -6,4 +6,5 @@ import sn.l3gl.prestation.model.Ressource;
 
 @Repository
 public interface RessourceRepository extends JpaRepository<Ressource, Long> {
+    java.util.List<Ressource> findByPrestationId(Long prestationId);
 }

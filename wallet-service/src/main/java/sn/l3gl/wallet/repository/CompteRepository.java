@@ -25,11 +25,11 @@ public interface CompteRepository extends JpaRepository<Compte, Long> {
      * (contrairement à un schéma "lire le solde puis réécrire").
      * @return le nombre de lignes affectées : 0 si le solde était insuffisant.
      */
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Compte c SET c.solde = c.solde - :montant WHERE c.id = :id AND c.solde >= :montant")
     int debiterSiSoldeSuffisant(@Param("id") Long id, @Param("montant") long montant);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Compte c SET c.solde = c.solde + :montant WHERE c.id = :id")
     int crediter(@Param("id") Long id, @Param("montant") long montant);
 }

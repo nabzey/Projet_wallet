@@ -21,6 +21,11 @@ public class RessourceController {
 
     private final RessourceWrapper ressourceWrapper;
 
+    @org.springframework.web.bind.annotation.GetMapping
+    public java.util.List<RessourceResponse> lister(@PathVariable Long prestationId) {
+        return ressourceWrapper.lister(prestationId);
+    }
+
     @Operation(summary = "Affecter une ressource à la prestation")
     @PostMapping
     public RessourceResponse affecter(@PathVariable Long prestationId,

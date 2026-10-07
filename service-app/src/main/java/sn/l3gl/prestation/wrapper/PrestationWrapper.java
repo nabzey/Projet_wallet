@@ -1,6 +1,7 @@
 package sn.l3gl.prestation.wrapper;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import sn.l3gl.prestation.dto.CreatePrestationRequest;
@@ -29,6 +30,9 @@ public class PrestationWrapper {
     private final PrestationMapper prestationMapper;
     private final WalletClient walletClient;
 
+    @Value("${app.kafka.enabled:true}")
+    private boolean kafkaEnabled;
+
     @Transactional
     public PrestationResponse creer(Long responsableId, CreatePrestationRequest request) {
         Prestation prestation = new Prestation();
@@ -51,6 +55,11 @@ public class PrestationWrapper {
 
         walletClient.initierPaiement(bearerToken, new PaiementRequestWallet(
                 prestation.getMontant(), request.getPin(), prestation.demandeId()));
+
+        if (!kafkaEnabled) {
+            prestationService.marquerPayee(prestation.demandeId());
+            return prestationMapper.toResponse(prestationService.findByIdOuThrow(prestationId));
+        }
 
         // Confirmation définitive du statut PAYEE via le listener Kafka (paiement-effectue),
         // ce qui garantit la cohérence même si la réponse HTTP se perd après le débit.

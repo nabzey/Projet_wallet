@@ -18,6 +18,7 @@ import java.util.Map;
  * génériques effacés qui ne correspondent pas à nos points d'injection typés.
  */
 @Configuration
+@org.springframework.kafka.annotation.EnableKafka
 public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")

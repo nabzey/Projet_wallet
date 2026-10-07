@@ -11,6 +11,10 @@ public class RessourceService {
 
     private final RessourceRepository ressourceRepository;
 
+    public java.util.List<Ressource> lister(Long prestationId) {
+        return ressourceRepository.findByPrestationId(prestationId);
+    }
+
     public Ressource save(Ressource ressource) {
         return ressourceRepository.save(ressource);
     }

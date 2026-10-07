@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import sn.l3gl.prestation.dto.PaiementEffectueEvent;
@@ -15,6 +16,7 @@ import sn.l3gl.prestation.service.PrestationService;
  * (l'utilisateur pourra retenter le paiement plus tard - compensation).
  */
 @Component
+@ConditionalOnProperty(name = "app.kafka.enabled", havingValue = "true", matchIfMissing = true)
 @Slf4j
 @RequiredArgsConstructor
 public class PaiementListener {

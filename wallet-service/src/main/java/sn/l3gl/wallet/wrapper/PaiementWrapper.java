@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import sn.l3gl.wallet.dto.*;
 import sn.l3gl.wallet.exception.PinInvalideException;
+import sn.l3gl.wallet.exception.PaiementDejaTraiteException;
 import sn.l3gl.wallet.helper.TransactionHelper;
 import sn.l3gl.wallet.mapper.TransactionMapper;
 import sn.l3gl.wallet.model.Compte;
@@ -38,6 +39,9 @@ public class PaiementWrapper {
     @Value("${kafka-topics.paiement-effectue}")
     private String topicPaiementEffectue;
 
+    @Value("${app.kafka.enabled:true}")
+    private boolean kafkaEnabled;
+
     @Transactional
     public TransactionResponse deposer(Long utilisateurId, DepotRequest request) {
         Compte compte = compteService.findByUtilisateurIdOuThrow(utilisateurId);
@@ -68,16 +72,30 @@ public class PaiementWrapper {
      */
     @Transactional
     public TransactionResponse payer(Long utilisateurId, PaiementRequest request) {
-        transactionService.verifierNonDejaTraite(request.getDemandeId());
-
         Compte compte = compteService.findByUtilisateurIdOuThrow(utilisateurId);
         verifierPin(utilisateurId, request.getPin());
+
+        if (!kafkaEnabled) {
+            var dejaTraite = transactionService.findByDemandeId(request.getDemandeId());
+            if (dejaTraite.isPresent()) {
+                Transaction transaction = dejaTraite.get();
+                if (!transaction.getCompte().getId().equals(compte.getId())
+                        || transaction.getMontant() != request.getMontant()) {
+                    throw new PaiementDejaTraiteException();
+                }
+                return transactionMapper.toResponse(transaction, compteService.soldeActuel(compte.getId()));
+            }
+        } else {
+            transactionService.verifierNonDejaTraite(request.getDemandeId());
+        }
 
         try {
             compteService.debiter(compte.getId(), request.getMontant());
         } catch (RuntimeException e) {
-            outboxService.enregistrer(topicPaiementEffectue, request.getDemandeId(),
-                    new PaiementEffectueEvent(request.getDemandeId(), "ECHEC", e.getMessage()));
+            if (kafkaEnabled) {
+                outboxService.enregistrer(topicPaiementEffectue, request.getDemandeId(),
+                        new PaiementEffectueEvent(request.getDemandeId(), "ECHEC", e.getMessage()));
+            }
             throw e;
         }
 
@@ -85,8 +103,10 @@ public class PaiementWrapper {
                 compte, request.getMontant(), TypeTransaction.PAIEMENT, request.getDemandeId());
         transactionService.save(transaction);
 
-        outboxService.enregistrer(topicPaiementEffectue, request.getDemandeId(),
-                new PaiementEffectueEvent(request.getDemandeId(), "SUCCESS", "Paiement effectué"));
+        if (kafkaEnabled) {
+            outboxService.enregistrer(topicPaiementEffectue, request.getDemandeId(),
+                    new PaiementEffectueEvent(request.getDemandeId(), "SUCCESS", "Paiement effectué"));
+        }
 
         return transactionMapper.toResponse(transaction, compteService.soldeActuel(compte.getId()));
     }

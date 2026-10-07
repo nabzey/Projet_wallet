@@ -35,16 +35,31 @@ public class AuthWrapper {
         otpService.genererEtEnvoyer(request.getTelephone());
     }
 
-    @Transactional
-    public void verifierOtp(VerifyOtpRequest request) {
+    public String verifierOtp(VerifyOtpRequest request) {
         otpService.verifier(request.getTelephone(), request.getCode());
         utilisateurService.creerSiAbsent(request.getTelephone());
+        return jwtService.genererVerificationToken(request.getTelephone());
+    }
+
+    public AuthResponse connecter(CreatePinRequest request) {
+        Utilisateur utilisateur = utilisateurService.findByTelephoneOuThrow(request.getTelephone());
+        if (utilisateur.getPinHash() == null || !pinService.verifier(request.getPin(), utilisateur.getPinHash())) {
+            throw new sn.l3gl.wallet.exception.PinInvalideException();
+        }
+        Compte compte = compteService.findByUtilisateurIdOuThrow(utilisateur.getId());
+        return new AuthResponse(jwtService.genererToken(utilisateur.getId(), utilisateur.getTelephone()), compte.getNumero());
     }
 
     @Transactional
     public AuthResponse creerPin(CreatePinRequest request) {
+        if (!jwtService.verificationValide(request.getVerificationToken(), request.getTelephone())) {
+            throw new sn.l3gl.wallet.exception.BusinessException("Vérifiez votre code OTP avant de créer le PIN.");
+        }
         Utilisateur utilisateur = utilisateurService.findByTelephoneOuThrow(request.getTelephone());
 
+        if (utilisateur.getPinHash() != null) {
+            throw new sn.l3gl.wallet.exception.BusinessException("Ce compte existe déjà. Utilisez la connexion avec votre PIN.");
+        }
         String pinHash = pinService.hacher(request.getPin());
         utilisateurService.definirPin(utilisateur, pinHash);
 

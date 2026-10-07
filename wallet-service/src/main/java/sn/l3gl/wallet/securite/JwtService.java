@@ -36,6 +36,19 @@ public class JwtService {
                 .compact();
     }
 
+    public String genererVerificationToken(String telephone) {
+        return Jwts.builder().subject(telephone).claim("purpose", "create-pin")
+                .expiration(new Date(System.currentTimeMillis() + 300000))
+                .signWith(cle()).compact();
+    }
+
+    public boolean verificationValide(String token, String telephone) {
+        try {
+            Claims claims = extraireClaims(token);
+            return telephone.equals(claims.getSubject()) && "create-pin".equals(claims.get("purpose"));
+        } catch (Exception e) { return false; }
+    }
+
     public Claims extraireClaims(String token) {
         return Jwts.parser()
                 .verifyWith(cle())
@@ -46,8 +59,7 @@ public class JwtService {
 
     public boolean estValide(String token) {
         try {
-            extraireClaims(token);
-            return true;
+            return extraireClaims(token).get("utilisateurId") instanceof Number;
         } catch (Exception e) {
             return false;
         }

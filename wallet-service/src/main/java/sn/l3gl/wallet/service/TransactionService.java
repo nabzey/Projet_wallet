@@ -7,6 +7,7 @@ import sn.l3gl.wallet.model.Transaction;
 import sn.l3gl.wallet.repository.TransactionRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,10 @@ public class TransactionService {
 
     public List<Transaction> historique(Long compteId) {
         return transactionRepository.findByCompteIdOrderByDateTransactionDesc(compteId);
+    }
+
+    public Optional<Transaction> findByDemandeId(String demandeId) {
+        return transactionRepository.findByDemandeId(demandeId);
     }
 
     /**

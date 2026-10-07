@@ -19,6 +19,11 @@ public class RessourceWrapper {
     private final RessourceService ressourceService;
     private final RessourceMapper ressourceMapper;
 
+    public java.util.List<RessourceResponse> lister(Long prestationId) {
+        prestationService.findByIdOuThrow(prestationId);
+        return ressourceService.lister(prestationId).stream().map(ressourceMapper::toResponse).toList();
+    }
+
     @Transactional
     public RessourceResponse affecter(Long prestationId, AffecterRessourceRequest request) {
         Prestation prestation = prestationService.findByIdOuThrow(prestationId);

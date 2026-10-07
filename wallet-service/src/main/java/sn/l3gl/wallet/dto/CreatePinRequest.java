@@ -12,4 +12,6 @@ public class CreatePinRequest {
     @NotBlank(message = "Le PIN est obligatoire !")
     @Pattern(regexp = "^[0-9]{4}$", message = "Le PIN doit contenir exactement 4 chiffres !")
     private String pin;
+
+    private String verificationToken;
 }

@@ -28,7 +28,7 @@ public class PrestationController {
         return prestationWrapper.creer(responsableId, request);
     }
 
-    @Operation(summary = "Payer la prestation", description = "Appelle wallet-service de façon synchrone (débit) ; la confirmation PAYEE arrive ensuite de façon asynchrone via Kafka.")
+    @Operation(summary = "Payer la prestation", description = "Débite le portefeuille ; confirme la prestation directement en mode démo ou via Kafka en mode normal.")
     @PostMapping("/{id}/payer")
     public PrestationResponse payer(@RequestHeader("Authorization") String bearerToken,
                                      @PathVariable Long id,
